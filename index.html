@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>J.A.R.V.I.S.</title>
-  <script src="https://jsdelivr.net"></script>
+  <script src="https://unpkg.com"></script>
   <style>
     body {
       margin: 0;
@@ -95,6 +95,11 @@
   <div id="status">SYSTEM STANDBY</div>
 
   <script>
+    window.onload = () => {
+      document.getElementById('url').value = localStorage.getItem('lk_url') || '';
+      document.getElementById('token').value = localStorage.getItem('lk_token') || '';
+    };
+
     let room;
     async function connectJarvis() {
       const url = document.getElementById('url').value.trim();
@@ -105,6 +110,9 @@
         status.innerText = "ERROR: MISSING URL OR TOKEN";
         return;
       }
+
+      localStorage.setItem('lk_url', url);
+      localStorage.setItem('lk_token', token);
 
       try {
         status.innerText = "ESTABLISHING UPLINK...";
@@ -127,5 +135,6 @@
     }
   </script>
 </body>
-  </html>
+</html>
+
   
