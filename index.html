@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>J.A.R.V.I.S.</title>
-  <script src="https://unpkg.com"></script>
   <style>
     body {
       margin: 0;
@@ -90,18 +89,20 @@
   <div class="controls">
     <input type="text" id="url" placeholder="LiveKit WebSocket URL (wss://...)">
     <input type="text" id="token" placeholder="LiveKit Room Token">
-    <button onclick="connectJarvis()">INITIALIZE JARVIS</button>
+    <button id="initBtn">INITIALIZE JARVIS</button>
   </div>
   <div id="status">SYSTEM STANDBY</div>
 
-  <script>
+  <script type="module">
+    import { Room, RoomEvent } from 'https://esm.sh';
+
     window.onload = () => {
       document.getElementById('url').value = localStorage.getItem('lk_url') || '';
       document.getElementById('token').value = localStorage.getItem('lk_token') || '';
     };
 
     let room;
-    async function connectJarvis() {
+    document.getElementById('initBtn').onclick = async () => {
       const url = document.getElementById('url').value.trim();
       const token = document.getElementById('token').value.trim();
       const status = document.getElementById('status');
@@ -116,9 +117,9 @@
 
       try {
         status.innerText = "ESTABLISHING UPLINK...";
-        room = new LivekitClient.Room();
+        room = new Room();
         
-        room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
+        room.on(RoomEvent.TrackSubscribed, (track) => {
           if (track.kind === 'audio') {
             const element = track.attach();
             document.body.appendChild(element);
@@ -132,9 +133,7 @@
       } catch (e) {
         status.innerText = "CONNECTION FAILED: " + e.message;
       }
-    }
+    };
   </script>
 </body>
 </html>
-
-  
