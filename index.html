@@ -15,9 +15,11 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      overflow: hidden;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
     }
+
     .orb-container {
       position: relative;
       width: 220px;
@@ -25,81 +27,104 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 30px;
+      margin-bottom: 45px;
     }
-    .orb {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #ffffff 0%, #00f0ff 40%, #0051ff 80%, transparent 100%);
-      box-shadow: 0 0 40px #00f0ff, 0 0 80px #0051ff;
-      animation: pulse 2.5s infinite ease-in-out;
-    }
+
     .ring {
       position: absolute;
-      width: 200px;
-      height: 200px;
+      width: 210px;
+      height: 210px;
       border: 2px dashed rgba(0, 240, 255, 0.5);
       border-radius: 50%;
-      animation: spin 10s linear infinite;
+      animation: spin 16s linear infinite;
     }
-    @keyframes pulse {
-      0%, 100% { transform: scale(0.95); opacity: 0.85; }
-      50% { transform: scale(1.08); opacity: 1; }
+
+    .orb {
+      width: 155px;
+      height: 155px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 0%, #00f0ff 40%, #0055ff 85%, transparent 100%);
+      box-shadow: 0 0 35px #00f0ff, 0 0 70px rgba(0, 136, 255, 0.6);
+      animation: pulse 3s ease-in-out infinite;
     }
+
     @keyframes spin {
       100% { transform: rotate(360deg); }
     }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(0.95); opacity: 0.85; }
+      50% { transform: scale(1.05); opacity: 1; }
+    }
+
     .controls {
+      width: 100%;
+      max-width: 380px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      width: 85%;
-      max-width: 320px;
+      gap: 14px;
     }
+
     input {
-      background: rgba(0, 240, 255, 0.1);
-      border: 1px solid #00f0ff;
-      color: #fff;
-      padding: 12px;
-      border-radius: 6px;
+      background: rgba(0, 240, 255, 0.05);
+      border: 1.5px solid rgba(0, 240, 255, 0.6);
+      border-radius: 8px;
+      padding: 14px;
+      color: #ffffff;
+      font-size: 15px;
       outline: none;
     }
+
+    input::placeholder {
+      color: rgba(0, 240, 255, 0.4);
+    }
+
     button {
       background: #00f0ff;
       color: #030914;
       border: none;
-      padding: 14px;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 16px;
       font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
       letter-spacing: 2px;
+      cursor: pointer;
+      margin-top: 4px;
     }
+
+    button:active {
+      opacity: 0.8;
+    }
+
     #status {
-      margin-top: 15px;
-      font-size: 13px;
       text-align: center;
+      margin-top: 12px;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      word-break: break-word;
     }
   </style>
 </head>
 <body>
+
   <div class="orb-container">
     <div class="ring"></div>
     <div class="orb" id="orb"></div>
   </div>
+
   <div class="controls">
     <input type="text" id="url" placeholder="LiveKit WebSocket URL (wss://...)">
     <input type="text" id="token" placeholder="LiveKit Room Token">
     <button id="initBtn">INITIALIZE JARVIS</button>
+    <div id="status">SYSTEM STANDBY</div>
   </div>
-  <div id="status">SYSTEM STANDBY</div>
 
-  <script type="module">
-    import { Room, RoomEvent } from 'https://esm.sh';
-
+  <script>
     window.onload = () => {
-      document.getElementById('url').value = localStorage.getItem('lk_url') || '';
-      document.getElementById('token').value = localStorage.getItem('lk_token') || '';
+      const savedUrl = localStorage.getItem('lk_url');
+      const savedToken = localStorage.getItem('lk_token');
+      if (savedUrl) document.getElementById('url').value = savedUrl;
+      if (savedToken) document.getElementById('token').value = savedToken;
     };
 
     let room;
@@ -118,9 +143,9 @@
 
       try {
         status.innerText = "ESTABLISHING UPLINK...";
-        room = new Room();
-        
-        room.on(RoomEvent.TrackSubscribed, (track) => {
+        room = new LivekitClient.Room();
+
+        room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
           if (track.kind === 'audio') {
             const element = track.attach();
             document.body.appendChild(element);
